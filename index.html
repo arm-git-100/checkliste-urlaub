@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkliste Urlaub</title>
+  <meta name="theme-color" content="#2e7d32">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Urlaub">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.svg">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+
+    .container {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 24px;
+      width: 100%;
+      max-width: 560px;
+      height: fit-content;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      color: #1a1a2e;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .status-bar {
+      text-align: center;
+      margin-bottom: 16px;
+      min-height: 22px;
+    }
+
+    .status-pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+
+    .status-pill.online  { background: #e8f5e9; color: #2e7d32; }
+    .status-pill.offline { background: #fdecea; color: #c62828; }
+
+    .filter-section {
+      background: #fafafa;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .filter-group:last-child { margin-bottom: 0; }
+
+    .filter-group .label {
+      font-size: 0.78rem;
+      color: #666;
+      font-weight: 600;
+      width: 80px;
+      flex-shrink: 0;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border: 1.5px solid #ddd;
+      border-radius: 14px;
+      background: #fff;
+      color: #555;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .chip:hover { border-color: #2e7d32; }
+
+    .chip.active {
+      background: #2e7d32;
+      border-color: #2e7d32;
+      color: #fff;
+    }
+
+    .chip.add-traveler {
+      border-style: dashed;
+      color: #2e7d32;
+    }
+
+    .chip.add-traveler:hover {
+      background: #e8f5e9;
+    }
+
+    .chip .remove-traveler {
+      margin-left: 4px;
+      font-size: 0.9rem;
+      opacity: 0.7;
+      cursor: pointer;
+    }
+
+    .chip .remove-traveler:hover { opacity: 1; }
+
+    .add-section {
+      margin-bottom: 16px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .input-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-row input:focus { border-color: #2e7d32; }
+
+    .input-row button {
+      padding: 10px 18px;
+      background: #2e7d32;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+
+    .input-row button:hover { background: #1b5e20; }
+
+    .picker-toggle {
+      display: inline-block;
+      font-size: 0.8rem;
+      color: #2e7d32;
+      cursor: pointer;
+      user-select: none;
+      margin-bottom: 6px;
+    }
+
+    .picker-toggle:hover { text-decoration: underline; }
+
+    .tag-picker {
+      display: none;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding: 8px;
+      background: #fafafa;
+      border-radius: 8px;
+    }
+
+    .tag-picker.open { display: flex; }
+
+    ul { list-style: none; }
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      animation: fadeIn 0.2s ease;
+      flex-wrap: wrap;
+    }
+
+    li:last-child { border-bottom: none; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    li input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #2e7d32;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    li .task-text {
+      flex: 1;
+      font-size: 1rem;
+      color: #333;
+      word-break: break-word;
+      min-width: 120px;
+    }
+
+    li.done .task-text {
+      text-decoration: line-through;
+      color: #aaa;
+    }
+
+    li button.delete {
+      background: none;
+      border: none;
+      color: #ccc;
+      font-size: 1.2rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    li button.delete:hover { color: #e53935; background: #fdecea; }
+
+    .item-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .tag-badge {
+      font-size: 0.68rem;
+      padding: 1px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      background: #eee;
+      color: #555;
+    }
+
+    .tag-badge.saison { background: #fff3e0; color: #e65100; }
+    .tag-badge.reisetyp { background: #e3f2fd; color: #1565c0; }
+    .tag-badge.person { background: #f3e5f5; color: #6a1b9a; }
+    .tag-badge.ausstattung { background: #e8f5e9; color: #2e7d32; }
+    .tag-badge.extras { background: #fff9c4; color: #f57f17; }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: #999;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .footer button {
+      background: none;
+      border: none;
+      color: #e53935;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0;
+    }
+
+    .footer button:hover { text-decoration: underline; }
+
+    .empty {
+      text-align: center;
+      color: #bbb;
+      padding: 28px 0;
+      font-size: 0.95rem;
+    }
+
+    .loading {
+      text-align: center;
+      color: #bbb;
+      padding: 28px 0;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #eee;
+      border-top-color: #2e7d32;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 480px) {
+      .filter-group .label { width: 100%; margin-bottom: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Checkliste Urlaub</h1>
+
+    <div class="status-bar">
+      <span id="statusPill" class="status-pill"></span>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-group" data-group="saison">
+        <span class="label">Saison</span>
+        <span class="chip active" data-value="all">Alle</span>
+        <span class="chip" data-value="Sommerurlaub">Sommer</span>
+        <span class="chip" data-value="Winterurlaub">Winter</span>
+      </div>
+      <div class="filter-group" data-group="reisetyp">
+        <span class="label">Reisetyp</span>
+        <span class="chip active" data-value="all">Alle</span>
+        <span class="chip" data-value="Autoreise">Auto</span>
+        <span class="chip" data-value="Flugreise">Flug</span>
+        <span class="chip" data-value="Wohnmobil">Wohnmobil</span>
+        <span class="chip" data-value="Fahrradreise">Fahrrad</span>
+      </div>
+      <div class="filter-group" data-group="person" id="personFilterGroup">
+        <span class="label">Person</span>
+        <!-- chips dynamic -->
+      </div>
+      <div class="filter-group" data-group="ausstattung">
+        <span class="label">Ausstattung</span>
+        <span class="chip active" data-value="Basis">Basis</span>
+        <span class="chip active" data-value="Spezial">Spezial</span>
+      </div>
+      <div class="filter-group" data-group="extras">
+        <span class="label">Extras</span>
+        <span class="chip" data-value="Hund">Hund</span>
+      </div>
+    </div>
+
+    <div class="add-section">
+      <div class="input-row">
+        <input type="text" id="taskInput" placeholder="Neues Item..." />
+        <button id="addBtn">Hinzufügen</button>
+      </div>
+      <span class="picker-toggle" id="pickerToggle">+ Tags wählen</span>
+      <div class="tag-picker" id="tagPicker">
+        <!-- chips dynamic -->
+      </div>
+    </div>
+
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <div>Verbinde mit Firebase…</div>
+    </div>
+
+    <ul id="taskList"></ul>
+    <p class="empty" id="emptyMsg" style="display:none">Keine Items im aktuellen Filter.</p>
+
+    <div class="footer">
+      <span id="counter"></span>
+      <button id="resetDoneBtn">Erledigte zurücksetzen</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+    import {
+      initializeFirestore,
+      persistentLocalCache,
+      collection,
+      doc,
+      getDoc,
+      getDocs,
+      setDoc,
+      onSnapshot,
+      addDoc,
+      updateDoc,
+      deleteDoc,
+      query,
+      orderBy,
+      serverTimestamp,
+      writeBatch
+    } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCQ8FkX-NffLfemn1eGz7ggzo5X__F-9jk",
+      authDomain: "meine-todo-app-d5195.firebaseapp.com",
+      projectId: "meine-todo-app-d5195",
+      storageBucket: "meine-todo-app-d5195.firebasestorage.app",
+      messagingSenderId: "973337143194",
+      appId: "1:973337143194:web:df95c5f494bb4f8602fc23"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = initializeFirestore(app, { localCache: persistentLocalCache() });
+
+    // --- Tag-Konstanten ---
+    const SAISON     = ['Sommerurlaub', 'Winterurlaub'];
+    const REISETYP   = ['Autoreise', 'Flugreise', 'Wohnmobil', 'Fahrradreise'];
+    const FIXE_PERSONEN  = ['Heike', 'Armin'];
+    const AUSSTATTUNG = ['Basis', 'Spezial'];
+    const EXTRAS    = ['Hund'];
+
+    function tagGroup(tag) {
+      if (SAISON.includes(tag))      return 'saison';
+      if (REISETYP.includes(tag))    return 'reisetyp';
+      if (AUSSTATTUNG.includes(tag)) return 'ausstattung';
+      if (EXTRAS.includes(tag))      return 'extras';
+      return 'person';
+    }
+
+    // --- State ---
+    let items   = [];
+    let travelers = [];     // [{id, name}]
+    let firstLoad = true;
+
+    let saisonFilter   = 'all';
+    let reisetypFilter = 'all';
+    let personFilter   = new Set(FIXE_PERSONEN);   // {Heike, Armin}
+    let ausstattungFilter = new Set(AUSSTATTUNG);  // {Basis, Spezial}
+    let extrasFilter   = new Set();                // leer
+
+    let pickerTags = new Set();   // beim Item-Hinzufügen aktive Tags
+
+    // --- DOM ---
+    const taskInput   = document.getElementById('taskInput');
+    const taskList    = document.getElementById('taskList');
+    const emptyMsg    = document.getElementById('emptyMsg');
+    const loadingEl   = document.getElementById('loading');
+    const statusPill  = document.getElementById('statusPill');
+    const counter     = document.getElementById('counter');
+    const personGroup = document.getElementById('personFilterGroup');
+    const tagPicker   = document.getElementById('tagPicker');
+    const pickerToggle = document.getElementById('pickerToggle');
+
+    // --- Online/Offline ---
+    function updateStatus() {
+      if (navigator.onLine) {
+        statusPill.textContent = 'Online · Daten werden synchronisiert';
+        statusPill.className   = 'status-pill online';
+      } else {
+        statusPill.textContent = 'Offline · Änderungen werden gespeichert sobald du wieder online bist';
+        statusPill.className   = 'status-pill offline';
+      }
+    }
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+    updateStatus();
+
+    // --- Firestore Refs ---
+    const itemsRef     = collection(db, 'urlaub_items');
+    const travelersRef = collection(db, 'urlaub_travelers');
+    const metaSeededDoc = doc(db, 'urlaub_meta', 'seeded');
+
+    // --- Standard-Items (Seed) ---
+    const SEED_ITEMS = [
+      // Basis
+      { text: 'Reisepass', tags: ['Basis'] },
+      { text: 'Personalausweis', tags: ['Basis'] },
+      { text: 'EC-/Kreditkarte', tags: ['Basis'] },
+      { text: 'Bargeld', tags: ['Basis'] },
+      { text: 'Handy + Ladegerät', tags: ['Basis'] },
+      { text: 'Kopfhörer', tags: ['Basis'] },
+      { text: 'Zahnbürste', tags: ['Basis'] },
+      { text: 'Zahnpasta', tags: ['Basis'] },
+      { text: 'Deo', tags: ['Basis'] },
+      { text: 'Duschgel', tags: ['Basis'] },
+      { text: 'Unterwäsche', tags: ['Basis'] },
+      { text: 'Socken', tags: ['Basis'] },
+      { text: 'Pyjama', tags: ['Basis'] },
+      { text: 'Medikamente', tags: ['Basis'] },
+      { text: 'Heizung runter', tags: ['Basis'] },
+      { text: 'Müll raus', tags: ['Basis'] },
+      { text: 'Fenster zu', tags: ['Basis'] },
+      { text: 'Pflanzen gießen lassen', tags: ['Basis'] },
+      { text: 'Briefkasten leeren lassen', tags: ['Basis'] },
+      // Sommer
+      { text: 'Sonnencreme', tags: ['Sommerurlaub', 'Basis'] },
+      { text: 'Sonnenbrille', tags: ['Sommerurlaub', 'Basis'] },
+      { text: 'Badesachen', tags: ['Sommerurlaub'] },
+      { text: 'Shorts', tags: ['Sommerurlaub'] },
+      { text: 'T-Shirts', tags: ['Sommerurlaub'] },
+      { text: 'Sandalen', tags: ['Sommerurlaub'] },
+      { text: 'Strandtuch', tags: ['Sommerurlaub'] },
+      { text: 'After-Sun', tags: ['Sommerurlaub'] },
+      // Winter
+      { text: 'Skijacke', tags: ['Winterurlaub'] },
+      { text: 'Skihose', tags: ['Winterurlaub'] },
+      { text: 'Skihelm', tags: ['Winterurlaub'] },
+      { text: 'Skibrille', tags: ['Winterurlaub'] },
+      { text: 'Mütze', tags: ['Winterurlaub'] },
+      { text: 'Handschuhe', tags: ['Winterurlaub'] },
+      { text: 'Schal', tags: ['Winterurlaub'] },
+      { text: 'Thermounterwäsche', tags: ['Winterurlaub'] },
+      { text: 'Lippenpflege', tags: ['Winterurlaub', 'Basis'] },
+      // Flug
+      { text: 'Online-Boarding-Pass', tags: ['Flugreise'] },
+      { text: 'Reise-Adapter', tags: ['Flugreise'] },
+      { text: 'Powerbank (Handgepäck-tauglich)', tags: ['Flugreise'] },
+      // Auto
+      { text: 'Führerschein', tags: ['Autoreise'] },
+      { text: 'Fahrzeugschein', tags: ['Autoreise'] },
+      { text: 'Warndreieck-Check', tags: ['Autoreise'] },
+      { text: 'Erste-Hilfe-Set-Check', tags: ['Autoreise'] },
+      { text: 'Vignette', tags: ['Autoreise'] },
+      { text: 'Navi/Offline-Karten', tags: ['Autoreise'] },
+      // Wohnmobil
+      { text: 'Strom-Kabel', tags: ['Wohnmobil'] },
+      { text: 'Frischwasserschlauch', tags: ['Wohnmobil'] },
+      { text: 'Abwasserschlauch', tags: ['Wohnmobil'] },
+      { text: 'Campingstuhl', tags: ['Wohnmobil'] },
+      { text: 'Campingtisch', tags: ['Wohnmobil'] },
+      { text: 'Spülmittel', tags: ['Wohnmobil'] },
+      { text: 'Müllbeutel', tags: ['Wohnmobil'] },
+      { text: 'Toilettenchemie', tags: ['Wohnmobil'] },
+      { text: 'Gasflasche-Check', tags: ['Wohnmobil'] },
+      // Fahrrad
+      { text: 'Fahrradhelm', tags: ['Fahrradreise'] },
+      { text: 'Fahrradschloss', tags: ['Fahrradreise'] },
+      { text: 'Flickzeug', tags: ['Fahrradreise'] },
+      { text: 'Ersatzschlauch', tags: ['Fahrradreise'] },
+      { text: 'Reifenpumpe', tags: ['Fahrradreise'] },
+      { text: 'Multitool', tags: ['Fahrradreise'] },
+      { text: 'Reflektoren/Lichter', tags: ['Fahrradreise'] },
+      { text: 'Regenjacke', tags: ['Fahrradreise'] },
+      { text: 'Trinkflasche', tags: ['Fahrradreise'] },
+      { text: 'Satteltaschen', tags: ['Fahrradreise'] },
+      { text: 'Padded Radhose', tags: ['Fahrradreise'] },
+      { text: 'Fahrradhandschuhe', tags: ['Fahrradreise'] },
+      { text: 'GPS/Routen offline', tags: ['Fahrradreise'] },
+      // Hund
+      { text: 'EU-Heimtierausweis', tags: ['Hund'] },
+      { text: 'Hundefutter', tags: ['Hund'] },
+      { text: 'Napf', tags: ['Hund'] },
+      { text: 'Leine', tags: ['Hund'] },
+      { text: 'Geschirr/Halsband', tags: ['Hund'] },
+      { text: 'Kotbeutel', tags: ['Hund'] },
+      { text: 'Hundedecke', tags: ['Hund'] },
+      { text: 'Spielzeug', tags: ['Hund'] },
+      { text: 'Zeckenmittel', tags: ['Hund'] },
+      { text: 'Handtuch für Hund', tags: ['Hund'] },
+      { text: 'Maulkorb (je nach Land)', tags: ['Hund'] },
+      { text: 'Wassernapf für unterwegs', tags: ['Hund'] }
+    ];
+
+    async function seedIfNeeded() {
+      try {
+        const metaSnap = await getDoc(metaSeededDoc);
+        if (metaSnap.exists()) return;
+        const itemsSnap = await getDocs(itemsRef);
+        if (!itemsSnap.empty) {
+          await setDoc(metaSeededDoc, { done: true, at: serverTimestamp() });
+          return;
+        }
+        const batch = writeBatch(db);
+        SEED_ITEMS.forEach(it => {
+          const d = doc(itemsRef);
+          batch.set(d, { text: it.text, tags: it.tags, done: false, createdAt: serverTimestamp() });
+        });
+        batch.set(metaSeededDoc, { done: true, at: serverTimestamp() });
+        await batch.commit();
+      } catch (err) {
+        console.warn('Seed fehlgeschlagen:', err);
+      }
+    }
+
+    // --- Snapshots ---
+    onSnapshot(query(itemsRef, orderBy('createdAt')), snap => {
+      items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      if (firstLoad) {
+        loadingEl.style.display = 'none';
+        firstLoad = false;
+      }
+      render();
+    });
+
+    onSnapshot(query(travelersRef, orderBy('createdAt')), snap => {
+      travelers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderPersonChips();
+      renderTagPicker();
+    });
+
+    seedIfNeeded();
+
+    // --- Person-Liste (fix + dynamisch) ---
+    function allPersons() {
+      return [...FIXE_PERSONEN, ...travelers.map(t => t.name)];
+    }
+
+    // --- Render: Person-Filter-Chips ---
+    function renderPersonChips() {
+      personGroup.innerHTML = '<span class="label">Person</span>';
+      FIXE_PERSONEN.forEach(name => {
+        const c = document.createElement('span');
+        c.className = 'chip' + (personFilter.has(name) ? ' active' : '');
+        c.dataset.value = name;
+        c.textContent = name;
+        personGroup.appendChild(c);
+      });
+      travelers.forEach(t => {
+        const c = document.createElement('span');
+        c.className = 'chip' + (personFilter.has(t.name) ? ' active' : '');
+        c.dataset.value = t.name;
+        c.dataset.travelerId = t.id;
+        c.innerHTML = `${escapeHtml(t.name)}<span class="remove-traveler" title="Person entfernen">×</span>`;
+        personGroup.appendChild(c);
+      });
+      const add = document.createElement('span');
+      add.className = 'chip add-traveler';
+      add.id = 'addTravelerBtn';
+      add.textContent = '+ Person';
+      personGroup.appendChild(add);
+    }
+
+    // --- Render: Tag-Picker beim Item-Hinzufügen ---
+    function renderTagPicker() {
+      tagPicker.innerHTML = '';
+      const all = [...SAISON, ...REISETYP, ...allPersons(), ...AUSSTATTUNG, ...EXTRAS];
+      all.forEach(tag => {
+        const c = document.createElement('span');
+        c.className = 'chip' + (pickerTags.has(tag) ? ' active' : '');
+        c.dataset.value = tag;
+        c.textContent = tag;
+        tagPicker.appendChild(c);
+      });
+    }
+
+    // --- Filter-Logik ---
+    function isVisible(item) {
+      const tags = item.tags || [];
+
+      const saisonTags = tags.filter(t => SAISON.includes(t));
+      if (saisonFilter !== 'all' && saisonTags.length > 0 && !saisonTags.includes(saisonFilter)) return false;
+
+      const reisetypTags = tags.filter(t => REISETYP.includes(t));
+      if (reisetypFilter !== 'all' && reisetypTags.length > 0 && !reisetypTags.includes(reisetypFilter)) return false;
+
+      const persons = allPersons();
+      const personTags = tags.filter(t => persons.includes(t));
+      if (personTags.length > 0 && !personTags.some(t => personFilter.has(t))) return false;
+
+      const ausstattungTags = tags.filter(t => AUSSTATTUNG.includes(t));
+      if (ausstattungTags.length > 0 && !ausstattungTags.some(t => ausstattungFilter.has(t))) return false;
+
+      const extrasTags = tags.filter(t => EXTRAS.includes(t));
+      if (extrasTags.length > 0 && !extrasTags.some(t => extrasFilter.has(t))) return false;
+
+      return true;
+    }
+
+    // --- Render: Item-Liste ---
+    function render() {
+      const visible = items.filter(isVisible);
+      taskList.innerHTML = '';
+      visible.forEach(it => {
+        const li = document.createElement('li');
+        if (it.done) li.classList.add('done');
+        li.dataset.id = it.id;
+        const badges = (it.tags || []).map(t =>
+          `<span class="tag-badge ${tagGroup(t)}">${escapeHtml(t)}</span>`
+        ).join('');
+        li.innerHTML = `
+          <input type="checkbox" ${it.done ? 'checked' : ''}>
+          <span class="task-text">${escapeHtml(it.text)}</span>
+          <span class="item-tags">${badges}</span>
+          <button class="delete" title="Löschen">&#x2715;</button>
+        `;
+        taskList.appendChild(li);
+      });
+      const open = items.filter(i => !i.done).length;
+      counter.textContent = `${open} offen · ${items.length} gesamt · ${visible.length} sichtbar`;
+      emptyMsg.style.display = visible.length === 0 && !firstLoad ? 'block' : 'none';
+    }
+
+    // --- Operations ---
+    async function addItem() {
+      const text = taskInput.value.trim();
+      if (!text) return;
+      const tags = [...pickerTags];
+      taskInput.value = '';
+      pickerTags.clear();
+      renderTagPicker();
+      await addDoc(itemsRef, { text, tags, done: false, createdAt: serverTimestamp() });
+    }
+
+    async function toggleItem(id) {
+      const it = items.find(x => x.id === id);
+      if (it) await updateDoc(doc(db, 'urlaub_items', id), { done: !it.done });
+    }
+
+    async function deleteItem(id) {
+      await deleteDoc(doc(db, 'urlaub_items', id));
+    }
+
+    async function resetDone() {
+      const done = items.filter(i => i.done);
+      if (!done.length) return;
+      const batch = writeBatch(db);
+      done.forEach(i => batch.update(doc(db, 'urlaub_items', i.id), { done: false }));
+      await batch.commit();
+    }
+
+    async function addTraveler() {
+      const name = prompt('Name der mitreisenden Person:');
+      if (!name) return;
+      const trimmed = name.trim();
+      if (!trimmed) return;
+      if (allPersons().some(p => p.toLowerCase() === trimmed.toLowerCase())) {
+        alert('Diese Person existiert bereits.');
+        return;
+      }
+      await addDoc(travelersRef, { name: trimmed, createdAt: serverTimestamp() });
+      personFilter.add(trimmed);
+    }
+
+    async function removeTraveler(travelerId, name) {
+      if (!confirm(`Person "${name}" entfernen? Items mit dieser Person bleiben bestehen.`)) return;
+      await deleteDoc(doc(db, 'urlaub_travelers', travelerId));
+      personFilter.delete(name);
+      pickerTags.delete(name);
+    }
+
+    // --- Filter-Click-Handler ---
+    document.querySelector('.filter-section').addEventListener('click', e => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      if (chip.id === 'addTravelerBtn') { addTraveler(); return; }
+
+      const remove = e.target.closest('.remove-traveler');
+      if (remove) {
+        e.stopPropagation();
+        const tid = chip.dataset.travelerId;
+        const name = chip.dataset.value;
+        if (tid) removeTraveler(tid, name);
+        return;
+      }
+
+      const group = chip.closest('.filter-group').dataset.group;
+      const value = chip.dataset.value;
+
+      if (group === 'saison') {
+        saisonFilter = value;
+        document.querySelectorAll('.filter-group[data-group="saison"] .chip').forEach(c => c.classList.toggle('active', c.dataset.value === value));
+      } else if (group === 'reisetyp') {
+        reisetypFilter = value;
+        document.querySelectorAll('.filter-group[data-group="reisetyp"] .chip').forEach(c => c.classList.toggle('active', c.dataset.value === value));
+      } else if (group === 'person') {
+        if (personFilter.has(value)) personFilter.delete(value); else personFilter.add(value);
+        chip.classList.toggle('active');
+      } else if (group === 'ausstattung') {
+        if (ausstattungFilter.has(value)) ausstattungFilter.delete(value); else ausstattungFilter.add(value);
+        chip.classList.toggle('active');
+      } else if (group === 'extras') {
+        if (extrasFilter.has(value)) extrasFilter.delete(value); else extrasFilter.add(value);
+        chip.classList.toggle('active');
+      }
+      render();
+    });
+
+    // --- Tag-Picker-Click-Handler ---
+    pickerToggle.addEventListener('click', () => {
+      tagPicker.classList.toggle('open');
+      pickerToggle.textContent = tagPicker.classList.contains('open') ? '− Tags ausblenden' : '+ Tags wählen';
+    });
+
+    tagPicker.addEventListener('click', e => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      const v = chip.dataset.value;
+      if (pickerTags.has(v)) pickerTags.delete(v); else pickerTags.add(v);
+      chip.classList.toggle('active');
+    });
+
+    // --- Item-List Events ---
+    taskList.addEventListener('change', e => {
+      if (e.target.type === 'checkbox') toggleItem(e.target.closest('li').dataset.id);
+    });
+    taskList.addEventListener('click', e => {
+      const btn = e.target.closest('button.delete');
+      if (btn) deleteItem(btn.closest('li').dataset.id);
+    });
+
+    // --- Buttons ---
+    document.getElementById('addBtn').addEventListener('click', addItem);
+    taskInput.addEventListener('keydown', e => { if (e.key === 'Enter') addItem(); });
+    document.getElementById('resetDoneBtn').addEventListener('click', resetDone);
+
+    // --- Helpers ---
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // --- Service Worker ---
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .catch(err => console.warn('Service Worker Fehler:', err));
+    }
+  </script>
+</body>
+</html>
