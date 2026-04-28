@@ -1,27 +1,39 @@
 # Checkliste Urlaub
 
-PWA-Packliste für Heike & Armin mit Echtzeit-Sync über Firebase Firestore.
+PWA-Packliste mit Multi-Tag-Filtern, Google-Login und Echtzeit-Sync via Firebase.
 
-## Filter
+**Live:** https://arm-git-100.github.io/checkliste-urlaub/
 
-- **Saison**: Sommerurlaub, Winterurlaub
-- **Reisetyp**: Auto, Flug, Wohnmobil, Fahrrad
-- **Person**: Heike, Armin + dynamisch hinzufügbare Mitreisende
-- **Ausstattung**: Basis, Spezial
-- **Extras**: Hund
+## Features
 
-Items können mehrere Tags haben. Sichtbarkeit pro Item: AND zwischen Filter-Gruppen, OR innerhalb. Items ohne Tag in einer Gruppe gelten als „immer relevant" für diese Gruppe.
+- Login per Google-Account (Email-Whitelist in Firestore Rules)
+- 5 Filtergruppen: Saison, Reisetyp, Person, Ausstattung, Extras
+- Items mit Mehrfach-Tags (z.B. „Sonnencreme" = Sommer + Basis)
+- Dynamisch hinzufügbare Mitreisende
+- ~80 vorbefüllte Standard-Items (Reisepass, Skihose, Hundefutter, …)
+- „Erledigte zurücksetzen" — Liste fürs nächste Jahr wiederverwendbar
+- PWA-installierbar, offline-fähig
+
+## Firebase
+
+| | |
+|--|--|
+| Projekt-ID | `checkliste-urlaub` |
+| Region | `europe-west3` |
+| Auth | Google Sign-In, Email-Whitelist in Rules |
+| Collections | `items`, `travelers`, `meta` |
 
 ## Hosting
 
-Statische Files via **GitHub Pages**, Daten in **Firebase Firestore** (gleiches Projekt wie testprojekt, Collections `urlaub_items`, `urlaub_travelers`, `urlaub_meta`).
+GitHub Pages über `https://arm-git-100.github.io/checkliste-urlaub/`. HTTPS automatisch, Service Worker cached die App offline.
 
-Deploy:
-1. Repo auf GitHub anlegen
-2. Files pushen
-3. Settings → Pages → Branch `main` → Save
-4. URL: `https://<user>.github.io/checkliste-urlaub/`
+## Deploy-Update
 
-## Erststart
+```bash
+cd C:/ai/projekte/checkliste-urlaub
+git add .
+git commit -m "Beschreibung"
+git push
+```
 
-Beim ersten Aufruf wird die Liste mit ~80 Standard-Items befüllt (Reisepass, Skihose, Hundefutter etc.). Der Seed-Status wird in `urlaub_meta/seeded` markiert, sodass keine Doppel-Befüllung passiert.
+GitHub Pages aktualisiert sich nach 1–2 Min automatisch.
