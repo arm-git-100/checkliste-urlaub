@@ -99,14 +99,16 @@
     .tag-picker { display: none; flex-wrap: wrap; gap: 5px; padding: 8px; background: #fafafa; border-radius: 8px; }
     .tag-picker.open { display: flex; }
 
-    /* Section headers für Item-Gruppen */
+    /* Section headers für Item-Gruppen mit dezentem Farbbalken */
     .section-header {
-      font-size: 0.78rem; font-weight: 700; color: #888;
-      text-transform: uppercase; letter-spacing: .5px;
-      padding: 14px 0 6px; border-bottom: 1px solid #eee; margin-bottom: 4px;
+      font-size: 0.85rem; font-weight: 700;
+      padding: 8px 12px; margin: 14px 0 8px;
+      border-radius: 6px; border-left: 4px solid var(--accent, #888);
+      background: var(--bg, #f5f5f5); color: var(--accent, #444);
       display: flex; align-items: center; gap: 6px;
+      letter-spacing: .3px;
     }
-    .section-header:first-child { padding-top: 0; }
+    .section-header:first-child { margin-top: 0; }
 
     ul { list-style: none; }
     li {
@@ -117,12 +119,16 @@
     li:last-child { border-bottom: none; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
+    li.editing { flex-direction: column; align-items: stretch; gap: 8px; padding: 14px 12px; background: #f7fdfd; border-radius: 8px; border-left: 3px solid #00838f; margin: 6px 0; }
+    li.editing .edit-row-1 { display: flex; align-items: center; gap: 10px; }
+    li.editing .edit-row-2 { display: flex; flex-wrap: wrap; gap: 5px; padding: 4px 0 0; }
+
     li input[type="checkbox"] { width: 18px; height: 18px; accent-color: #00838f; cursor: pointer; flex-shrink: 0; }
     li .task-text { flex: 1; font-size: 1rem; color: #333; word-break: break-word; min-width: 120px; cursor: text; }
     li.done .task-text { text-decoration: line-through; color: #aaa; }
 
     .edit-input {
-      flex: 1; padding: 4px 8px; border: 2px solid #00838f; border-radius: 6px;
+      flex: 1; padding: 6px 10px; border: 2px solid #00838f; border-radius: 6px;
       font-size: 1rem; outline: none; min-width: 120px;
     }
 
@@ -133,14 +139,17 @@
     }
     li button.icon-btn.delete:hover { color: #e53935; background: #fdecea; }
     li button.icon-btn.edit:hover { color: #00838f; background: #e0f7fa; }
+    li button.icon-btn.save { color: #00838f; }
+    li button.icon-btn.save:hover { color: #fff; background: #00838f; }
+    li button.icon-btn.cancel:hover { color: #e53935; background: #fdecea; }
 
     .item-tags { display: flex; flex-wrap: wrap; gap: 4px; }
     .tag-badge { font-size: 0.68rem; padding: 1px 8px; border-radius: 10px; font-weight: 600; background: #eee; color: #555; }
     .tag-badge.saison { background: #fff3e0; color: #e65100; }
     .tag-badge.reisetyp { background: #e3f2fd; color: #1565c0; }
-    .tag-badge.person { background: #f3e5f5; color: #6a1b9a; }
     .tag-badge.ausstattung { background: #e8f5e9; color: #2e7d32; }
     .tag-badge.extras { background: #fff9c4; color: #f57f17; }
+    /* .tag-badge.person bekommt Inline-Style aus PERSON_PALETTE */
 
     .footer-options { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
     .toggle-row { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: #555; cursor: pointer; user-select: none; }
@@ -278,7 +287,7 @@
   import {
     initializeFirestore,
     persistentLocalCache,
-    collection, doc, getDoc, getDocs, setDoc,
+    collection, doc, getDoc, setDoc,
     onSnapshot, addDoc, updateDoc, deleteDoc,
     query, orderBy, serverTimestamp, writeBatch
   } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-firestore.js";
@@ -300,28 +309,76 @@
   const travelersRef = collection(db, 'travelers');
   const metaSeededDoc = doc(db, 'meta', 'seeded');
 
-  // Tag-Konstanten
+  // ── Tag-Konstanten ────────────────────────────────────────────────
   const SAISON     = ['Frühlingsurlaub', 'Sommerurlaub', 'Herbsturlaub', 'Winterurlaub'];
   const REISETYP   = ['Autoreise', 'Flugreise', 'Wohnmobil'];
   const FIXE_PERSONEN = ['Heike', 'Armin'];
   const AUSSTATTUNG = ['Basis', 'Spezial'];
   const EXTRAS    = ['Hund', 'Fahrrad'];
 
-  // Bucket-Reihenfolge für Section-Header (Spezifischer zuerst)
-  const BUCKET_ORDER = [
-    ['Frühlingsurlaub',  '🌸 Frühling'],
-    ['Sommerurlaub',     '☀️ Sommer'],
-    ['Herbsturlaub',     '🍂 Herbst'],
-    ['Winterurlaub',     '❄️ Winter'],
-    ['Autoreise',        '🚗 Auto'],
-    ['Flugreise',        '✈️ Flug'],
-    ['Wohnmobil',        '🚐 Wohnmobil'],
-    ['Hund',             '🐕 Hund'],
-    ['Fahrrad',          '🚲 Fahrrad'],
-    ['Basis',            '📋 Basis'],
-    ['Spezial',          '⭐ Spezial'],
-    ['__sonstige__',     '📌 Sonstige']
+  // Bucket → Anzeige-Label + Farbschema
+  const BUCKETS = {
+    'Basis':           { label: '📋 Basis',    accent: '#5d4037', bg: '#efebe9' },
+    'Spezial':         { label: '⭐ Spezial',  accent: '#f57f17', bg: '#fff8e1' },
+    'Frühlingsurlaub': { label: '🌸 Frühling', accent: '#558b2f', bg: '#f1f8e9' },
+    'Sommerurlaub':    { label: '☀️ Sommer',   accent: '#e65100', bg: '#fff3e0' },
+    'Herbsturlaub':    { label: '🍂 Herbst',   accent: '#bf360c', bg: '#fbe9e7' },
+    'Winterurlaub':    { label: '❄️ Winter',   accent: '#1565c0', bg: '#e3f2fd' },
+    'Autoreise':       { label: '🚗 Auto',     accent: '#37474f', bg: '#eceff1' },
+    'Flugreise':       { label: '✈️ Flug',     accent: '#0277bd', bg: '#e1f5fe' },
+    'Wohnmobil':       { label: '🚐 Wohnmobil',accent: '#00695c', bg: '#e0f2f1' },
+    'Hund':            { label: '🐕 Hund',     accent: '#6d4c41', bg: '#efebe9' },
+    'Fahrrad':         { label: '🚲 Fahrrad',  accent: '#2e7d32', bg: '#e8f5e9' },
+    '__sonstige__':    { label: '📌 Sonstige', accent: '#616161', bg: '#f5f5f5' }
+  };
+
+  // Welche Tag-Reihenfolge nutze ich um den Bucket eines Items zu bestimmen?
+  // (Spezifische Tags zuerst → Items mit Saison-Tag landen unter Saison, nicht Basis)
+  const BUCKET_PRIORITY = [
+    'Frühlingsurlaub', 'Sommerurlaub', 'Herbsturlaub', 'Winterurlaub',
+    'Autoreise', 'Flugreise', 'Wohnmobil',
+    'Hund', 'Fahrrad',
+    'Spezial',
+    'Basis'
   ];
+
+  // Reihenfolge in der die Sektionen angezeigt werden (Basis zuerst)
+  const BUCKET_DISPLAY = [
+    'Basis',
+    'Spezial',
+    'Frühlingsurlaub', 'Sommerurlaub', 'Herbsturlaub', 'Winterurlaub',
+    'Autoreise', 'Flugreise', 'Wohnmobil',
+    'Hund', 'Fahrrad',
+    '__sonstige__'
+  ];
+
+  // Personen-Farbpalette (Pastell-Hintergrund + dunkler Text)
+  const PERSON_PALETTE = [
+    { bg: '#e3f2fd', color: '#1565c0' }, // Blau
+    { bg: '#fce4ec', color: '#c2185b' }, // Pink
+    { bg: '#f3e5f5', color: '#6a1b9a' }, // Lila
+    { bg: '#e8f5e9', color: '#2e7d32' }, // Grün
+    { bg: '#fff3e0', color: '#e65100' }, // Orange
+    { bg: '#fff9c4', color: '#f57f17' }, // Gelb
+    { bg: '#e0f7fa', color: '#00838f' }, // Teal
+    { bg: '#efebe9', color: '#5d4037' }, // Braun
+    { bg: '#fbe9e7', color: '#d84315' }, // Rotbraun
+    { bg: '#e8eaf6', color: '#3949ab' }  // Indigo
+  ];
+
+  // Heike + Armin bekommen feste Farben (Pink + Blau)
+  const PERSON_FIXED = {
+    'Heike': PERSON_PALETTE[1],  // Pink
+    'Armin': PERSON_PALETTE[0]   // Blau
+  };
+
+  function personColor(name) {
+    if (PERSON_FIXED[name]) return PERSON_FIXED[name];
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    // Indizes 0+1 sind reserviert für Heike/Armin
+    return PERSON_PALETTE[2 + (h % (PERSON_PALETTE.length - 2))];
+  }
 
   function tagGroup(tag) {
     if (SAISON.includes(tag))      return 'saison';
@@ -333,19 +390,20 @@
 
   function bucketOf(item) {
     const tags = item.tags || [];
-    for (const [bucketTag] of BUCKET_ORDER) {
+    for (const bucketTag of BUCKET_PRIORITY) {
       if (tags.includes(bucketTag)) return bucketTag;
     }
     return '__sonstige__';
   }
 
-  // State
+  // ── State ───────────────────────────────────────────────────────────
   let items = [];
   let travelers = [];
   let listenersAttached = false;
   let unsubItems = null;
   let unsubTravelers = null;
   let editingId = null;
+  let editingTags = null;   // Set während Edit-Modus
   let hideDone = localStorage.getItem('hideDone') === '1';
 
   let saisonFilter   = 'all';
@@ -355,7 +413,7 @@
   let extrasFilter   = new Set();
   let pickerTags     = new Set();
 
-  // DOM
+  // ── DOM-Refs ────────────────────────────────────────────────────────
   const taskInput   = document.getElementById('taskInput');
   const taskList    = document.getElementById('taskList');
   const emptyMsg    = document.getElementById('emptyMsg');
@@ -369,7 +427,7 @@
 
   hideDoneCheck.checked = hideDone;
 
-  // Online/Offline
+  // ── Online/Offline ──────────────────────────────────────────────────
   function updateStatus() {
     if (navigator.onLine) {
       statusPill.textContent = 'Online · Daten werden synchronisiert';
@@ -383,7 +441,7 @@
   window.addEventListener('offline', updateStatus);
   updateStatus();
 
-  // Screens
+  // ── Screens ─────────────────────────────────────────────────────────
   function showScreen(name) {
     document.getElementById('loginScreen').style.display   = name === 'login'   ? 'flex' : 'none';
     document.getElementById('loadingScreen').style.display = name === 'loading' ? 'flex' : 'none';
@@ -391,7 +449,7 @@
     document.getElementById('app').style.display           = name === 'app'     ? ''     : 'none';
   }
 
-  // Auth
+  // ── Auth ────────────────────────────────────────────────────────────
   onAuthStateChanged(auth, user => {
     if (user) {
       document.getElementById('userInfo').textContent = user.displayName || user.email;
@@ -420,7 +478,7 @@
   window.doSignIn = doSignIn;
   window.doSignOut = doSignOut;
 
-  // Listeners
+  // ── Listeners ───────────────────────────────────────────────────────
   function attachListeners() {
     if (listenersAttached) return;
     listenersAttached = true;
@@ -468,7 +526,7 @@
     listenersAttached = false;
   }
 
-  // Seed-Daten (für initial Setup und v2-Migration)
+  // ── Seed-Daten + Migration ─────────────────────────────────────────
   const SEED_V1 = [
     { text: 'Reisepass', tags: ['Basis'] },
     { text: 'Personalausweis', tags: ['Basis'] },
@@ -489,7 +547,6 @@
     { text: 'Fenster zu', tags: ['Basis'] },
     { text: 'Pflanzen gießen lassen', tags: ['Basis'] },
     { text: 'Briefkasten leeren lassen', tags: ['Basis'] },
-    // Sommer
     { text: 'Sonnencreme', tags: ['Sommerurlaub'] },
     { text: 'Sonnenbrille', tags: ['Sommerurlaub'] },
     { text: 'Badesachen', tags: ['Sommerurlaub'] },
@@ -498,7 +555,6 @@
     { text: 'Sandalen', tags: ['Sommerurlaub'] },
     { text: 'Strandtuch', tags: ['Sommerurlaub'] },
     { text: 'After-Sun', tags: ['Sommerurlaub'] },
-    // Winter
     { text: 'Skijacke', tags: ['Winterurlaub'] },
     { text: 'Skihose', tags: ['Winterurlaub'] },
     { text: 'Skihelm', tags: ['Winterurlaub'] },
@@ -508,18 +564,15 @@
     { text: 'Schal', tags: ['Winterurlaub'] },
     { text: 'Thermounterwäsche', tags: ['Winterurlaub'] },
     { text: 'Lippenpflege', tags: ['Winterurlaub'] },
-    // Flug
     { text: 'Online-Boarding-Pass', tags: ['Flugreise'] },
     { text: 'Reise-Adapter', tags: ['Flugreise'] },
     { text: 'Powerbank (Handgepäck-tauglich)', tags: ['Flugreise'] },
-    // Auto
     { text: 'Führerschein', tags: ['Autoreise'] },
     { text: 'Fahrzeugschein', tags: ['Autoreise'] },
     { text: 'Warndreieck-Check', tags: ['Autoreise'] },
     { text: 'Erste-Hilfe-Set-Check', tags: ['Autoreise'] },
     { text: 'Vignette', tags: ['Autoreise'] },
     { text: 'Navi/Offline-Karten', tags: ['Autoreise'] },
-    // Wohnmobil
     { text: 'Strom-Kabel', tags: ['Wohnmobil'] },
     { text: 'Frischwasserschlauch', tags: ['Wohnmobil'] },
     { text: 'Abwasserschlauch', tags: ['Wohnmobil'] },
@@ -529,7 +582,6 @@
     { text: 'Müllbeutel', tags: ['Wohnmobil'] },
     { text: 'Toilettenchemie', tags: ['Wohnmobil'] },
     { text: 'Gasflasche-Check', tags: ['Wohnmobil'] },
-    // Hund
     { text: 'EU-Heimtierausweis', tags: ['Hund'] },
     { text: 'Hundefutter', tags: ['Hund'] },
     { text: 'Napf', tags: ['Hund'] },
@@ -542,7 +594,6 @@
     { text: 'Handtuch für Hund', tags: ['Hund'] },
     { text: 'Maulkorb (je nach Land)', tags: ['Hund'] },
     { text: 'Wassernapf für unterwegs', tags: ['Hund'] },
-    // Fahrrad (umgezogen von Reisetyp zu Extras)
     { text: 'Fahrradhelm', tags: ['Fahrrad'] },
     { text: 'Fahrradschloss', tags: ['Fahrrad'] },
     { text: 'Flickzeug', tags: ['Fahrrad'] },
@@ -558,16 +609,13 @@
     { text: 'GPS/Routen offline', tags: ['Fahrrad'] }
   ];
 
-  // Items für v2 (Frühling + Herbst)
   const SEED_V2_NEW = [
-    // Frühling
     { text: 'Übergangsjacke', tags: ['Frühlingsurlaub'] },
     { text: 'Regenjacke', tags: ['Frühlingsurlaub'] },
     { text: 'Pullover', tags: ['Frühlingsurlaub'] },
     { text: 'Sneaker', tags: ['Frühlingsurlaub'] },
     { text: 'Allergie-Tabletten', tags: ['Frühlingsurlaub'] },
     { text: 'Leichter Schal', tags: ['Frühlingsurlaub'] },
-    // Herbst
     { text: 'Herbstjacke', tags: ['Herbsturlaub'] },
     { text: 'Regenschirm', tags: ['Herbsturlaub'] },
     { text: 'Geschlossene Schuhe', tags: ['Herbsturlaub'] },
@@ -590,19 +638,15 @@
       const batch = writeBatch(db);
 
       if (currentVersion === 0) {
-        // Initial seed (v1 + v2 zusammen)
         [...SEED_V1, ...SEED_V2_NEW].forEach(it => {
           const d = doc(itemsRef);
           batch.set(d, { text: it.text, tags: it.tags, done: false, createdAt: serverTimestamp() });
         });
       } else if (currentVersion === 1) {
-        // Migration v1 → v2:
-        // 1. Frühlings-/Herbst-Items hinzufügen
         SEED_V2_NEW.forEach(it => {
           const d = doc(itemsRef);
           batch.set(d, { text: it.text, tags: it.tags, done: false, createdAt: serverTimestamp() });
         });
-        // 2. "Fahrradreise" → "Fahrrad" Tag-Migration
         items.forEach(i => {
           const tags = i.tags || [];
           if (tags.includes('Fahrradreise')) {
@@ -619,7 +663,7 @@
     }
   }
 
-  // Helpers
+  // ── Helpers ─────────────────────────────────────────────────────────
   function allPersons() {
     return [...FIXE_PERSONEN, ...travelers.map(t => t.name)];
   }
@@ -630,22 +674,26 @@
       .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  // Render: Person-Filter-Chips
+  function badgeStyleFor(tag) {
+    if (tagGroup(tag) !== 'person') return '';
+    const c = personColor(tag);
+    return `style="background:${c.bg};color:${c.color}"`;
+  }
+
+  // ── Render: Filter-Person-Chips ─────────────────────────────────────
   function renderPersonChips() {
     personGroup.innerHTML = '<span class="label">Person</span>';
-    FIXE_PERSONEN.forEach(name => {
+    allPersons().forEach(name => {
       const c = document.createElement('span');
       c.className = 'chip' + (personFilter.has(name) ? ' active' : '');
       c.dataset.value = name;
-      c.textContent = name;
-      personGroup.appendChild(c);
-    });
-    travelers.forEach(t => {
-      const c = document.createElement('span');
-      c.className = 'chip' + (personFilter.has(t.name) ? ' active' : '');
-      c.dataset.value = t.name;
-      c.dataset.travelerId = t.id;
-      c.innerHTML = `${escapeHtml(t.name)}<span class="remove-traveler" title="Person entfernen">×</span>`;
+      const traveler = travelers.find(t => t.name === name);
+      if (traveler) {
+        c.dataset.travelerId = traveler.id;
+        c.innerHTML = `${escapeHtml(name)}<span class="remove-traveler" title="Person entfernen">×</span>`;
+      } else {
+        c.textContent = name;
+      }
       personGroup.appendChild(c);
     });
     const add = document.createElement('span');
@@ -655,7 +703,7 @@
     personGroup.appendChild(add);
   }
 
-  // Render: Tag-Picker
+  // ── Render: Tag-Picker (zum Hinzufügen neuer Items) ─────────────────
   function renderTagPicker() {
     tagPicker.innerHTML = '';
     const all = [...SAISON, ...REISETYP, ...allPersons(), ...AUSSTATTUNG, ...EXTRAS];
@@ -668,7 +716,7 @@
     });
   }
 
-  // Filter-Logik
+  // ── Filter-Logik ────────────────────────────────────────────────────
   function isVisible(item) {
     const tags = item.tags || [];
 
@@ -693,21 +741,35 @@
     return true;
   }
 
+  // ── Render: Item-Zeile ──────────────────────────────────────────────
   function renderItemRow(it) {
     const li = document.createElement('li');
-    if (it.done) li.classList.add('done');
     li.dataset.id = it.id;
     const isEditing = editingId === it.id;
-    const badges = (it.tags || []).map(t =>
-      `<span class="tag-badge ${tagGroup(t)}">${escapeHtml(t)}</span>`
-    ).join('');
+
     if (isEditing) {
+      li.classList.add('editing');
+      const allTagsForPicker = [...SAISON, ...REISETYP, ...allPersons(), ...AUSSTATTUNG, ...EXTRAS];
+      const chips = allTagsForPicker.map(tag => {
+        const active = editingTags.has(tag);
+        const styleAttr = active && tagGroup(tag) === 'person'
+          ? `style="background:${personColor(tag).color};color:#fff;border-color:${personColor(tag).color}"`
+          : '';
+        return `<span class="chip${active ? ' active' : ''}" data-value="${escapeHtml(tag)}" ${styleAttr}>${escapeHtml(tag)}</span>`;
+      }).join('');
       li.innerHTML = `
-        <input type="checkbox" ${it.done ? 'checked' : ''} disabled>
-        <input class="edit-input" type="text" value="${escapeHtml(it.text)}">
-        <span class="item-tags">${badges}</span>
+        <div class="edit-row-1">
+          <input class="edit-input" type="text" value="${escapeHtml(it.text)}">
+          <button class="icon-btn save" title="Speichern (Enter)">💾</button>
+          <button class="icon-btn cancel" title="Abbrechen (Esc)">✕</button>
+        </div>
+        <div class="edit-row-2">${chips}</div>
       `;
     } else {
+      if (it.done) li.classList.add('done');
+      const badges = (it.tags || []).map(t =>
+        `<span class="tag-badge ${tagGroup(t)}" ${badgeStyleFor(t)}>${escapeHtml(t)}</span>`
+      ).join('');
       li.innerHTML = `
         <input type="checkbox" ${it.done ? 'checked' : ''}>
         <span class="task-text" title="Klick zum Bearbeiten">${escapeHtml(it.text)}</span>
@@ -719,12 +781,11 @@
     return li;
   }
 
-  // Render: Item-Liste mit Sektion-Headers, alphabetisch sortiert
+  // ── Render: Liste mit Sektion-Headern, alphabetisch ──────────────────
   function render() {
     const visible = items.filter(isVisible);
     taskList.innerHTML = '';
 
-    // Items in Buckets gruppieren
     const buckets = new Map();
     visible.forEach(it => {
       const b = bucketOf(it);
@@ -732,24 +793,25 @@
       buckets.get(b).push(it);
     });
 
-    // In definierter Reihenfolge rendern, alphabetisch sortiert
-    BUCKET_ORDER.forEach(([bucketTag, label]) => {
+    BUCKET_DISPLAY.forEach(bucketTag => {
       const list = buckets.get(bucketTag);
       if (!list || !list.length) return;
       list.sort((a, b) => a.text.localeCompare(b.text, 'de'));
 
+      const bucket = BUCKETS[bucketTag];
       const header = document.createElement('div');
       header.className = 'section-header';
-      header.textContent = label;
+      header.style.setProperty('--accent', bucket.accent);
+      header.style.setProperty('--bg', bucket.bg);
+      header.textContent = bucket.label;
       taskList.appendChild(header);
 
       list.forEach(it => taskList.appendChild(renderItemRow(it)));
     });
 
-    // Edit-Input fokussieren falls aktiv
     if (editingId) {
       const input = taskList.querySelector('.edit-input');
-      if (input) { input.focus(); input.select(); }
+      if (input && document.activeElement !== input) { input.focus(); input.select(); }
     }
 
     const open = items.filter(i => !i.done).length;
@@ -757,7 +819,7 @@
     emptyMsg.style.display = (visible.length === 0 && items.length > 0) ? 'block' : 'none';
   }
 
-  // Operations
+  // ── Operations ──────────────────────────────────────────────────────
   async function addItem() {
     const text = taskInput.value.trim();
     if (!text) return;
@@ -778,12 +840,42 @@
     await deleteDoc(doc(db, 'items', id));
   }
 
-  async function saveEdit(id, newText) {
-    const trimmed = newText.trim();
+  function startEdit(id) {
+    const it = items.find(x => x.id === id);
+    if (!it) return;
+    editingId = id;
+    editingTags = new Set(it.tags || []);
+    render();
+  }
+
+  function cancelEdit() {
+    editingId = null;
+    editingTags = null;
+    render();
+  }
+
+  async function commitEdit() {
+    if (!editingId) return;
+    const li = taskList.querySelector(`li[data-id="${editingId}"]`);
+    if (!li) { editingId = null; editingTags = null; return; }
+    const input = li.querySelector('.edit-input');
+    const newText = input ? input.value.trim() : '';
+    const id = editingId;
+    const newTags = [...editingTags];
     const item = items.find(i => i.id === id);
-    if (!item) return;
-    if (trimmed && trimmed !== item.text) {
-      await updateDoc(doc(db, 'items', id), { text: trimmed });
+    editingId = null;
+    editingTags = null;
+    if (!item) { render(); return; }
+    if (!newText) { render(); return; }
+    const update = {};
+    if (newText !== item.text) update.text = newText;
+    const oldTags = item.tags || [];
+    const tagsChanged = newTags.length !== oldTags.length || newTags.some(t => !oldTags.includes(t));
+    if (tagsChanged) update.tags = newTags;
+    if (Object.keys(update).length) {
+      await updateDoc(doc(db, 'items', id), update);
+    } else {
+      render();
     }
   }
 
@@ -839,7 +931,7 @@
     pickerTags.delete(name);
   }
 
-  // Backup / Restore
+  // ── Backup / Restore ────────────────────────────────────────────────
   function exportBackup() {
     const data = {
       app: 'checkliste-urlaub',
@@ -876,13 +968,11 @@
     const travCount = (data.travelers || []).length;
     if (!confirm(`${itemCount} Items und ${travCount} Mitreisende importieren?\n\n⚠️  ALLE bestehenden Daten werden vorher gelöscht.`)) return;
 
-    // 1) Bestehende löschen
     const delBatch = writeBatch(db);
     items.forEach(i => delBatch.delete(doc(db, 'items', i.id)));
     travelers.forEach(t => delBatch.delete(doc(db, 'travelers', t.id)));
     await delBatch.commit();
 
-    // 2) Neue einfügen (in Chunks von 400, Firestore-Batch-Limit 500)
     const all = [
       ...data.items.map(it => ({
         ref: doc(itemsRef),
@@ -940,7 +1030,7 @@
     render();
   });
 
-  // Tag-Picker
+  // Tag-Picker (hinzufügen)
   pickerToggle.addEventListener('click', () => {
     tagPicker.classList.toggle('open');
     pickerToggle.textContent = tagPicker.classList.contains('open') ? '− Tags ausblenden' : '+ Tags wählen';
@@ -953,54 +1043,66 @@
     chip.classList.toggle('active');
   });
 
-  // Items: Click (toggle / edit / delete)
+  // Items: Click-Handler (toggle / edit / delete / save / cancel / tag-toggle)
   taskList.addEventListener('change', e => {
     if (e.target.type === 'checkbox' && !e.target.disabled) {
       const li = e.target.closest('li');
-      if (li) toggleItem(li.dataset.id);
+      if (li && !li.classList.contains('editing')) toggleItem(li.dataset.id);
     }
   });
+
+  taskList.addEventListener('mousedown', e => {
+    // Verhindern dass das Klicken auf Chips/Buttons im Edit-Mode den Input blurrt
+    if (editingId && (e.target.closest('.chip') || e.target.closest('button.icon-btn'))) {
+      e.preventDefault();
+    }
+  });
+
   taskList.addEventListener('click', e => {
+    const li = e.target.closest('li');
+    if (!li) return;
+    const id = li.dataset.id;
+
+    // Edit-Mode aktiv und in diesem li → Tag-Toggle / Save / Cancel
+    if (li.classList.contains('editing')) {
+      const chip = e.target.closest('.chip');
+      if (chip) {
+        const v = chip.dataset.value;
+        if (editingTags.has(v)) {
+          editingTags.delete(v);
+          chip.classList.remove('active');
+          if (tagGroup(v) === 'person') chip.removeAttribute('style');
+        } else {
+          editingTags.add(v);
+          chip.classList.add('active');
+          if (tagGroup(v) === 'person') {
+            const c = personColor(v);
+            chip.setAttribute('style', `background:${c.color};color:#fff;border-color:${c.color}`);
+          }
+        }
+        return;
+      }
+      if (e.target.closest('button.save')) { commitEdit(); return; }
+      if (e.target.closest('button.cancel')) { cancelEdit(); return; }
+      return;
+    }
+
+    // Nicht-Edit-Mode
     const editBtn = e.target.closest('button.edit');
-    if (editBtn) {
-      editingId = editBtn.closest('li').dataset.id;
-      render();
-      return;
-    }
+    if (editBtn) { startEdit(id); return; }
     const delBtn = e.target.closest('button.delete');
-    if (delBtn) {
-      deleteItem(delBtn.closest('li').dataset.id);
-      return;
-    }
+    if (delBtn) { deleteItem(id); return; }
     const text = e.target.closest('.task-text');
-    if (text) {
-      editingId = text.closest('li').dataset.id;
-      render();
-    }
+    if (text) { startEdit(id); return; }
   });
 
   // Edit-Input: Enter speichert, Escape bricht ab
   taskList.addEventListener('keydown', e => {
     const input = e.target.closest('.edit-input');
     if (!input) return;
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      input.blur();
-    } else if (e.key === 'Escape') {
-      e.preventDefault();
-      editingId = null;
-      render();
-    }
+    if (e.key === 'Enter') { e.preventDefault(); commitEdit(); }
+    else if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
   });
-  taskList.addEventListener('blur', async e => {
-    const input = e.target.closest('.edit-input');
-    if (!input) return;
-    const id = input.closest('li').dataset.id;
-    const newText = input.value;
-    editingId = null;
-    await saveEdit(id, newText);
-    render();
-  }, true); // capture: blur bubblet nicht
 
   // Hinzufügen
   document.getElementById('addBtn').addEventListener('click', addItem);
