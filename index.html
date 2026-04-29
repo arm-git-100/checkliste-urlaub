@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Checkliste Urlaub</title>
-  <meta name="theme-color" content="#2e7d32">
+  <meta name="theme-color" content="#00838f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Urlaub">
   <link rel="manifest" href="manifest.json">
@@ -15,7 +15,7 @@
 
     /* Screens */
     .screen { display: none; position: fixed; inset: 0; flex-direction: column; align-items: center; justify-content: center; z-index: 500; }
-    #loginScreen   { background: linear-gradient(135deg,#2e7d32 0%,#1b5e20 100%); color:#fff; }
+    #loginScreen   { background: linear-gradient(135deg,#00838f 0%,#006064 100%); color:#fff; }
     #loadingScreen { background: #f0f2f5; }
     #errorScreen   { background: #f0f2f5; }
 
@@ -31,7 +31,7 @@
     }
     .google-btn:hover { box-shadow:0 4px 16px rgba(0,0,0,.3); }
 
-    .spinner-lg { width:48px; height:48px; border:4px solid #c8e6c9; border-top-color:#2e7d32; border-radius:50%; animation:spin .8s linear infinite; margin-bottom:14px; }
+    .spinner-lg { width:48px; height:48px; border:4px solid #b2ebf2; border-top-color:#00838f; border-radius:50%; animation:spin .8s linear infinite; margin-bottom:14px; }
     @keyframes spin { to { transform:rotate(360deg); } }
 
     .error-card { text-align:center; padding:40px 32px; max-width:320px; }
@@ -39,7 +39,7 @@
 
     /* Header */
     header {
-      background:#2e7d32; color:#fff; padding:14px 20px;
+      background:#00838f; color:#fff; padding:14px 20px;
       display:flex; align-items:center; gap:10px;
       box-shadow:0 2px 8px rgba(0,0,0,.2); position:sticky; top:0; z-index:100;
     }
@@ -47,15 +47,18 @@
     .user-info { font-size:0.78rem; opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:160px; }
     .btn-logout { background:none; border:none; color:rgba(255,255,255,.8); font-size:1.2rem; cursor:pointer; padding:4px; line-height:1; }
     .btn-logout:hover { color:#fff; }
-    .btn-primary { padding:10px 18px; border:none; border-radius:8px; background:#2e7d32; color:#fff; font-weight:600; cursor:pointer; }
-    .btn-primary:hover { background:#1b5e20; }
+
+    .btn-primary { padding:10px 18px; border:none; border-radius:8px; background:#00838f; color:#fff; font-weight:600; cursor:pointer; transition:background .2s; }
+    .btn-primary:hover { background:#006064; }
+    .btn-secondary { padding:8px 14px; border:1.5px solid #00838f; border-radius:8px; background:#fff; color:#00838f; font-weight:600; cursor:pointer; font-size:.85rem; transition:all .15s; }
+    .btn-secondary:hover { background:#e0f7fa; }
 
     /* App */
     main { padding: 16px 12px; max-width: 580px; margin: 0 auto; }
 
     .status-bar { text-align: center; margin-bottom: 12px; min-height: 22px; }
     .status-pill { display: inline-block; font-size: 0.72rem; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
-    .status-pill.online  { background: #e8f5e9; color: #2e7d32; }
+    .status-pill.online  { background: #e0f7fa; color: #00838f; }
     .status-pill.offline { background: #fdecea; color: #c62828; }
 
     .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); padding: 16px; margin-bottom: 14px; }
@@ -76,10 +79,10 @@
       background: #fff; color: #555; font-size: 0.8rem; cursor: pointer;
       transition: all 0.15s; user-select: none;
     }
-    .chip:hover { border-color: #2e7d32; }
-    .chip.active { background: #2e7d32; border-color: #2e7d32; color: #fff; }
-    .chip.add-traveler { border-style: dashed; color: #2e7d32; }
-    .chip.add-traveler:hover { background: #e8f5e9; }
+    .chip:hover { border-color: #00838f; }
+    .chip.active { background: #00838f; border-color: #00838f; color: #fff; }
+    .chip.add-traveler { border-style: dashed; color: #00838f; }
+    .chip.add-traveler:hover { background: #e0f7fa; }
     .chip .remove-traveler { margin-left: 4px; font-size: 0.9rem; opacity: 0.7; cursor: pointer; }
     .chip .remove-traveler:hover { opacity: 1; }
 
@@ -88,13 +91,22 @@
       flex: 1; padding: 10px 14px; border: 2px solid #ddd; border-radius: 8px;
       font-size: 1rem; outline: none; transition: border-color 0.2s;
     }
-    .input-row input:focus { border-color: #2e7d32; }
+    .input-row input:focus { border-color: #00838f; }
 
-    .picker-toggle { display: inline-block; font-size: 0.8rem; color: #2e7d32; cursor: pointer; user-select: none; margin-bottom: 6px; }
+    .picker-toggle { display: inline-block; font-size: 0.8rem; color: #00838f; cursor: pointer; user-select: none; margin-bottom: 6px; }
     .picker-toggle:hover { text-decoration: underline; }
 
     .tag-picker { display: none; flex-wrap: wrap; gap: 5px; padding: 8px; background: #fafafa; border-radius: 8px; }
     .tag-picker.open { display: flex; }
+
+    /* Section headers für Item-Gruppen */
+    .section-header {
+      font-size: 0.78rem; font-weight: 700; color: #888;
+      text-transform: uppercase; letter-spacing: .5px;
+      padding: 14px 0 6px; border-bottom: 1px solid #eee; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .section-header:first-child { padding-top: 0; }
 
     ul { list-style: none; }
     li {
@@ -105,15 +117,22 @@
     li:last-child { border-bottom: none; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
-    li input[type="checkbox"] { width: 18px; height: 18px; accent-color: #2e7d32; cursor: pointer; flex-shrink: 0; }
-    li .task-text { flex: 1; font-size: 1rem; color: #333; word-break: break-word; min-width: 120px; }
+    li input[type="checkbox"] { width: 18px; height: 18px; accent-color: #00838f; cursor: pointer; flex-shrink: 0; }
+    li .task-text { flex: 1; font-size: 1rem; color: #333; word-break: break-word; min-width: 120px; cursor: text; }
     li.done .task-text { text-decoration: line-through; color: #aaa; }
-    li button.delete {
-      background: none; border: none; color: #ccc; font-size: 1.2rem;
-      cursor: pointer; line-height: 1; padding: 2px 6px; border-radius: 4px;
-      transition: color 0.2s, background 0.2s;
+
+    .edit-input {
+      flex: 1; padding: 4px 8px; border: 2px solid #00838f; border-radius: 6px;
+      font-size: 1rem; outline: none; min-width: 120px;
     }
-    li button.delete:hover { color: #e53935; background: #fdecea; }
+
+    li button.icon-btn {
+      background: none; border: none; color: #ccc; font-size: 1rem;
+      cursor: pointer; line-height: 1; padding: 4px 6px; border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+    }
+    li button.icon-btn.delete:hover { color: #e53935; background: #fdecea; }
+    li button.icon-btn.edit:hover { color: #00838f; background: #e0f7fa; }
 
     .item-tags { display: flex; flex-wrap: wrap; gap: 4px; }
     .tag-badge { font-size: 0.68rem; padding: 1px 8px; border-radius: 10px; font-weight: 600; background: #eee; color: #555; }
@@ -123,9 +142,15 @@
     .tag-badge.ausstattung { background: #e8f5e9; color: #2e7d32; }
     .tag-badge.extras { background: #fff9c4; color: #f57f17; }
 
-    .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; font-size: 0.85rem; color: #999; flex-wrap: wrap; gap: 8px; }
+    .footer-options { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0; }
+    .toggle-row { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: #555; cursor: pointer; user-select: none; }
+    .toggle-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: #00838f; cursor: pointer; }
+
+    .footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #999; flex-wrap: wrap; gap: 8px; }
     .footer button { background: none; border: none; color: #e53935; cursor: pointer; font-size: 0.85rem; padding: 0; }
     .footer button:hover { text-decoration: underline; }
+
+    .actions-bar { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .empty { text-align: center; color: #bbb; padding: 28px 0; font-size: 0.95rem; }
 
@@ -188,7 +213,9 @@
       <div class="filter-group" data-group="saison">
         <span class="label">Saison</span>
         <span class="chip active" data-value="all">Alle</span>
+        <span class="chip" data-value="Frühlingsurlaub">Frühling</span>
         <span class="chip" data-value="Sommerurlaub">Sommer</span>
+        <span class="chip" data-value="Herbsturlaub">Herbst</span>
         <span class="chip" data-value="Winterurlaub">Winter</span>
       </div>
       <div class="filter-group" data-group="reisetyp">
@@ -197,7 +224,6 @@
         <span class="chip" data-value="Autoreise">Auto</span>
         <span class="chip" data-value="Flugreise">Flug</span>
         <span class="chip" data-value="Wohnmobil">Wohnmobil</span>
-        <span class="chip" data-value="Fahrradreise">Fahrrad</span>
       </div>
       <div class="filter-group" data-group="person" id="personFilterGroup">
         <span class="label">Person</span>
@@ -210,6 +236,7 @@
       <div class="filter-group" data-group="extras">
         <span class="label">Extras</span>
         <span class="chip" data-value="Hund">Hund</span>
+        <span class="chip" data-value="Fahrrad">Fahrrad</span>
       </div>
     </div>
 
@@ -223,6 +250,17 @@
     </div>
 
     <div class="card">
+      <div class="footer-options">
+        <label class="toggle-row">
+          <input type="checkbox" id="hideDoneCheck">
+          Erledigte ausblenden
+        </label>
+        <div class="actions-bar">
+          <button class="btn-secondary" id="exportBtn" title="Backup als JSON">📥 Backup</button>
+          <button class="btn-secondary" id="importBtn" title="Backup einspielen">📤 Restore</button>
+          <input type="file" id="importInput" accept="application/json" style="display:none">
+        </div>
+      </div>
       <ul id="taskList"></ul>
       <p class="empty" id="emptyMsg" style="display:none">Keine Items im aktuellen Filter.</p>
       <div class="footer">
@@ -263,11 +301,27 @@
   const metaSeededDoc = doc(db, 'meta', 'seeded');
 
   // Tag-Konstanten
-  const SAISON     = ['Sommerurlaub', 'Winterurlaub'];
-  const REISETYP   = ['Autoreise', 'Flugreise', 'Wohnmobil', 'Fahrradreise'];
+  const SAISON     = ['Frühlingsurlaub', 'Sommerurlaub', 'Herbsturlaub', 'Winterurlaub'];
+  const REISETYP   = ['Autoreise', 'Flugreise', 'Wohnmobil'];
   const FIXE_PERSONEN = ['Heike', 'Armin'];
   const AUSSTATTUNG = ['Basis', 'Spezial'];
-  const EXTRAS    = ['Hund'];
+  const EXTRAS    = ['Hund', 'Fahrrad'];
+
+  // Bucket-Reihenfolge für Section-Header (Spezifischer zuerst)
+  const BUCKET_ORDER = [
+    ['Frühlingsurlaub',  '🌸 Frühling'],
+    ['Sommerurlaub',     '☀️ Sommer'],
+    ['Herbsturlaub',     '🍂 Herbst'],
+    ['Winterurlaub',     '❄️ Winter'],
+    ['Autoreise',        '🚗 Auto'],
+    ['Flugreise',        '✈️ Flug'],
+    ['Wohnmobil',        '🚐 Wohnmobil'],
+    ['Hund',             '🐕 Hund'],
+    ['Fahrrad',          '🚲 Fahrrad'],
+    ['Basis',            '📋 Basis'],
+    ['Spezial',          '⭐ Spezial'],
+    ['__sonstige__',     '📌 Sonstige']
+  ];
 
   function tagGroup(tag) {
     if (SAISON.includes(tag))      return 'saison';
@@ -277,13 +331,22 @@
     return 'person';
   }
 
+  function bucketOf(item) {
+    const tags = item.tags || [];
+    for (const [bucketTag] of BUCKET_ORDER) {
+      if (tags.includes(bucketTag)) return bucketTag;
+    }
+    return '__sonstige__';
+  }
+
   // State
   let items = [];
   let travelers = [];
-  let firstLoad = true;
   let listenersAttached = false;
   let unsubItems = null;
   let unsubTravelers = null;
+  let editingId = null;
+  let hideDone = localStorage.getItem('hideDone') === '1';
 
   let saisonFilter   = 'all';
   let reisetypFilter = 'all';
@@ -301,6 +364,10 @@
   const personGroup = document.getElementById('personFilterGroup');
   const tagPicker   = document.getElementById('tagPicker');
   const pickerToggle = document.getElementById('pickerToggle');
+  const hideDoneCheck = document.getElementById('hideDoneCheck');
+  const importInput = document.getElementById('importInput');
+
+  hideDoneCheck.checked = hideDone;
 
   // Online/Offline
   function updateStatus() {
@@ -333,7 +400,6 @@
     } else {
       showScreen('login');
       detachListeners();
-      firstLoad = true;
       items = [];
       travelers = [];
     }
@@ -354,7 +420,7 @@
   window.doSignIn = doSignIn;
   window.doSignOut = doSignOut;
 
-  // Firestore Listeners
+  // Listeners
   function attachListeners() {
     if (listenersAttached) return;
     listenersAttached = true;
@@ -363,7 +429,7 @@
     function checkReady() {
       if (itemsLoaded && travelersLoaded) {
         showScreen('app');
-        seedIfNeeded();
+        runMigrations();
       }
     }
 
@@ -386,6 +452,7 @@
         travelersLoaded = true;
         renderPersonChips();
         renderTagPicker();
+        render();
         checkReady();
       },
       err => {
@@ -401,9 +468,8 @@
     listenersAttached = false;
   }
 
-  // Seed (Standard-Items beim ersten Start)
-  const SEED_ITEMS = [
-    // Basis
+  // Seed-Daten (für initial Setup und v2-Migration)
+  const SEED_V1 = [
     { text: 'Reisepass', tags: ['Basis'] },
     { text: 'Personalausweis', tags: ['Basis'] },
     { text: 'EC-/Kreditkarte', tags: ['Basis'] },
@@ -424,8 +490,8 @@
     { text: 'Pflanzen gießen lassen', tags: ['Basis'] },
     { text: 'Briefkasten leeren lassen', tags: ['Basis'] },
     // Sommer
-    { text: 'Sonnencreme', tags: ['Sommerurlaub', 'Basis'] },
-    { text: 'Sonnenbrille', tags: ['Sommerurlaub', 'Basis'] },
+    { text: 'Sonnencreme', tags: ['Sommerurlaub'] },
+    { text: 'Sonnenbrille', tags: ['Sommerurlaub'] },
     { text: 'Badesachen', tags: ['Sommerurlaub'] },
     { text: 'Shorts', tags: ['Sommerurlaub'] },
     { text: 'T-Shirts', tags: ['Sommerurlaub'] },
@@ -441,7 +507,7 @@
     { text: 'Handschuhe', tags: ['Winterurlaub'] },
     { text: 'Schal', tags: ['Winterurlaub'] },
     { text: 'Thermounterwäsche', tags: ['Winterurlaub'] },
-    { text: 'Lippenpflege', tags: ['Winterurlaub', 'Basis'] },
+    { text: 'Lippenpflege', tags: ['Winterurlaub'] },
     // Flug
     { text: 'Online-Boarding-Pass', tags: ['Flugreise'] },
     { text: 'Reise-Adapter', tags: ['Flugreise'] },
@@ -463,20 +529,6 @@
     { text: 'Müllbeutel', tags: ['Wohnmobil'] },
     { text: 'Toilettenchemie', tags: ['Wohnmobil'] },
     { text: 'Gasflasche-Check', tags: ['Wohnmobil'] },
-    // Fahrrad
-    { text: 'Fahrradhelm', tags: ['Fahrradreise'] },
-    { text: 'Fahrradschloss', tags: ['Fahrradreise'] },
-    { text: 'Flickzeug', tags: ['Fahrradreise'] },
-    { text: 'Ersatzschlauch', tags: ['Fahrradreise'] },
-    { text: 'Reifenpumpe', tags: ['Fahrradreise'] },
-    { text: 'Multitool', tags: ['Fahrradreise'] },
-    { text: 'Reflektoren/Lichter', tags: ['Fahrradreise'] },
-    { text: 'Regenjacke', tags: ['Fahrradreise'] },
-    { text: 'Trinkflasche', tags: ['Fahrradreise'] },
-    { text: 'Satteltaschen', tags: ['Fahrradreise'] },
-    { text: 'Padded Radhose', tags: ['Fahrradreise'] },
-    { text: 'Fahrradhandschuhe', tags: ['Fahrradreise'] },
-    { text: 'GPS/Routen offline', tags: ['Fahrradreise'] },
     // Hund
     { text: 'EU-Heimtierausweis', tags: ['Hund'] },
     { text: 'Hundefutter', tags: ['Hund'] },
@@ -485,33 +537,85 @@
     { text: 'Geschirr/Halsband', tags: ['Hund'] },
     { text: 'Kotbeutel', tags: ['Hund'] },
     { text: 'Hundedecke', tags: ['Hund'] },
-    { text: 'Spielzeug', tags: ['Hund'] },
+    { text: 'Spielzeug für Hund', tags: ['Hund'] },
     { text: 'Zeckenmittel', tags: ['Hund'] },
     { text: 'Handtuch für Hund', tags: ['Hund'] },
     { text: 'Maulkorb (je nach Land)', tags: ['Hund'] },
-    { text: 'Wassernapf für unterwegs', tags: ['Hund'] }
+    { text: 'Wassernapf für unterwegs', tags: ['Hund'] },
+    // Fahrrad (umgezogen von Reisetyp zu Extras)
+    { text: 'Fahrradhelm', tags: ['Fahrrad'] },
+    { text: 'Fahrradschloss', tags: ['Fahrrad'] },
+    { text: 'Flickzeug', tags: ['Fahrrad'] },
+    { text: 'Ersatzschlauch', tags: ['Fahrrad'] },
+    { text: 'Reifenpumpe', tags: ['Fahrrad'] },
+    { text: 'Multitool', tags: ['Fahrrad'] },
+    { text: 'Reflektoren/Lichter', tags: ['Fahrrad'] },
+    { text: 'Regenjacke (Rad)', tags: ['Fahrrad'] },
+    { text: 'Trinkflasche', tags: ['Fahrrad'] },
+    { text: 'Satteltaschen', tags: ['Fahrrad'] },
+    { text: 'Padded Radhose', tags: ['Fahrrad'] },
+    { text: 'Fahrradhandschuhe', tags: ['Fahrrad'] },
+    { text: 'GPS/Routen offline', tags: ['Fahrrad'] }
   ];
 
-  let seedingTried = false;
-  async function seedIfNeeded() {
-    if (seedingTried) return;
-    seedingTried = true;
+  // Items für v2 (Frühling + Herbst)
+  const SEED_V2_NEW = [
+    // Frühling
+    { text: 'Übergangsjacke', tags: ['Frühlingsurlaub'] },
+    { text: 'Regenjacke', tags: ['Frühlingsurlaub'] },
+    { text: 'Pullover', tags: ['Frühlingsurlaub'] },
+    { text: 'Sneaker', tags: ['Frühlingsurlaub'] },
+    { text: 'Allergie-Tabletten', tags: ['Frühlingsurlaub'] },
+    { text: 'Leichter Schal', tags: ['Frühlingsurlaub'] },
+    // Herbst
+    { text: 'Herbstjacke', tags: ['Herbsturlaub'] },
+    { text: 'Regenschirm', tags: ['Herbsturlaub'] },
+    { text: 'Geschlossene Schuhe', tags: ['Herbsturlaub'] },
+    { text: 'Wollpulli', tags: ['Herbsturlaub'] },
+    { text: 'Lange Hose', tags: ['Herbsturlaub'] },
+    { text: 'Mütze (leicht)', tags: ['Herbsturlaub'] }
+  ];
+
+  const TARGET_VERSION = 2;
+  let migrationDone = false;
+
+  async function runMigrations() {
+    if (migrationDone) return;
+    migrationDone = true;
     try {
       const metaSnap = await getDoc(metaSeededDoc);
-      if (metaSnap.exists()) return;
-      if (items.length > 0) {
-        await setDoc(metaSeededDoc, { done: true, at: serverTimestamp() });
-        return;
-      }
+      const currentVersion = metaSnap.exists() ? (metaSnap.data().version || 1) : 0;
+      if (currentVersion >= TARGET_VERSION) return;
+
       const batch = writeBatch(db);
-      SEED_ITEMS.forEach(it => {
-        const d = doc(itemsRef);
-        batch.set(d, { text: it.text, tags: it.tags, done: false, createdAt: serverTimestamp() });
-      });
-      batch.set(metaSeededDoc, { done: true, at: serverTimestamp() });
+
+      if (currentVersion === 0) {
+        // Initial seed (v1 + v2 zusammen)
+        [...SEED_V1, ...SEED_V2_NEW].forEach(it => {
+          const d = doc(itemsRef);
+          batch.set(d, { text: it.text, tags: it.tags, done: false, createdAt: serverTimestamp() });
+        });
+      } else if (currentVersion === 1) {
+        // Migration v1 → v2:
+        // 1. Frühlings-/Herbst-Items hinzufügen
+        SEED_V2_NEW.forEach(it => {
+          const d = doc(itemsRef);
+          batch.set(d, { text: it.text, tags: it.tags, done: false, createdAt: serverTimestamp() });
+        });
+        // 2. "Fahrradreise" → "Fahrrad" Tag-Migration
+        items.forEach(i => {
+          const tags = i.tags || [];
+          if (tags.includes('Fahrradreise')) {
+            const newTags = tags.map(t => t === 'Fahrradreise' ? 'Fahrrad' : t);
+            batch.update(doc(db, 'items', i.id), { tags: newTags });
+          }
+        });
+      }
+
+      batch.set(metaSeededDoc, { version: TARGET_VERSION, at: serverTimestamp() }, { merge: true });
       await batch.commit();
     } catch (err) {
-      console.warn('Seed fehlgeschlagen:', err);
+      console.warn('Migration fehlgeschlagen:', err);
     }
   }
 
@@ -584,28 +688,70 @@
     const extrasTags = tags.filter(t => EXTRAS.includes(t));
     if (extrasTags.length > 0 && !extrasTags.some(t => extrasFilter.has(t))) return false;
 
+    if (hideDone && item.done) return false;
+
     return true;
   }
 
-  // Render: Item-Liste
+  function renderItemRow(it) {
+    const li = document.createElement('li');
+    if (it.done) li.classList.add('done');
+    li.dataset.id = it.id;
+    const isEditing = editingId === it.id;
+    const badges = (it.tags || []).map(t =>
+      `<span class="tag-badge ${tagGroup(t)}">${escapeHtml(t)}</span>`
+    ).join('');
+    if (isEditing) {
+      li.innerHTML = `
+        <input type="checkbox" ${it.done ? 'checked' : ''} disabled>
+        <input class="edit-input" type="text" value="${escapeHtml(it.text)}">
+        <span class="item-tags">${badges}</span>
+      `;
+    } else {
+      li.innerHTML = `
+        <input type="checkbox" ${it.done ? 'checked' : ''}>
+        <span class="task-text" title="Klick zum Bearbeiten">${escapeHtml(it.text)}</span>
+        <span class="item-tags">${badges}</span>
+        <button class="icon-btn edit" title="Bearbeiten">✎</button>
+        <button class="icon-btn delete" title="Löschen">✕</button>
+      `;
+    }
+    return li;
+  }
+
+  // Render: Item-Liste mit Sektion-Headers, alphabetisch sortiert
   function render() {
     const visible = items.filter(isVisible);
     taskList.innerHTML = '';
+
+    // Items in Buckets gruppieren
+    const buckets = new Map();
     visible.forEach(it => {
-      const li = document.createElement('li');
-      if (it.done) li.classList.add('done');
-      li.dataset.id = it.id;
-      const badges = (it.tags || []).map(t =>
-        `<span class="tag-badge ${tagGroup(t)}">${escapeHtml(t)}</span>`
-      ).join('');
-      li.innerHTML = `
-        <input type="checkbox" ${it.done ? 'checked' : ''}>
-        <span class="task-text">${escapeHtml(it.text)}</span>
-        <span class="item-tags">${badges}</span>
-        <button class="delete" title="Löschen">&#x2715;</button>
-      `;
-      taskList.appendChild(li);
+      const b = bucketOf(it);
+      if (!buckets.has(b)) buckets.set(b, []);
+      buckets.get(b).push(it);
     });
+
+    // In definierter Reihenfolge rendern, alphabetisch sortiert
+    BUCKET_ORDER.forEach(([bucketTag, label]) => {
+      const list = buckets.get(bucketTag);
+      if (!list || !list.length) return;
+      list.sort((a, b) => a.text.localeCompare(b.text, 'de'));
+
+      const header = document.createElement('div');
+      header.className = 'section-header';
+      header.textContent = label;
+      taskList.appendChild(header);
+
+      list.forEach(it => taskList.appendChild(renderItemRow(it)));
+    });
+
+    // Edit-Input fokussieren falls aktiv
+    if (editingId) {
+      const input = taskList.querySelector('.edit-input');
+      if (input) { input.focus(); input.select(); }
+    }
+
     const open = items.filter(i => !i.done).length;
     counter.textContent = `${open} offen · ${items.length} gesamt · ${visible.length} sichtbar`;
     emptyMsg.style.display = (visible.length === 0 && items.length > 0) ? 'block' : 'none';
@@ -628,12 +774,23 @@
   }
 
   async function deleteItem(id) {
+    if (!confirm('Item wirklich löschen?')) return;
     await deleteDoc(doc(db, 'items', id));
+  }
+
+  async function saveEdit(id, newText) {
+    const trimmed = newText.trim();
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    if (trimmed && trimmed !== item.text) {
+      await updateDoc(doc(db, 'items', id), { text: trimmed });
+    }
   }
 
   async function resetDone() {
     const done = items.filter(i => i.done);
     if (!done.length) return;
+    if (!confirm(`${done.length} erledigte Items zurücksetzen (auf nicht-erledigt)?`)) return;
     const batch = writeBatch(db);
     done.forEach(i => batch.update(doc(db, 'items', i.id), { done: false }));
     await batch.commit();
@@ -653,13 +810,100 @@
   }
 
   async function removeTraveler(travelerId, name) {
-    if (!confirm(`Person "${name}" entfernen? Items mit dieser Person bleiben bestehen.`)) return;
-    await deleteDoc(doc(db, 'travelers', travelerId));
+    const persons = allPersons();
+    const itemsToDelete = [];
+    const itemsToUpdate = [];
+    items.forEach(i => {
+      const tags = i.tags || [];
+      if (!tags.includes(name)) return;
+      const personTagsOnItem = tags.filter(t => persons.includes(t));
+      if (personTagsOnItem.length === 1) {
+        itemsToDelete.push(i);
+      } else {
+        itemsToUpdate.push({ id: i.id, newTags: tags.filter(t => t !== name) });
+      }
+    });
+
+    let msg = `Person "${name}" entfernen?`;
+    if (itemsToDelete.length) msg += `\n\n• ${itemsToDelete.length} Item(s) ausschließlich dieser Person werden gelöscht.`;
+    if (itemsToUpdate.length) msg += `\n• ${itemsToUpdate.length} Item(s) mit weiteren Personen behalten ihre anderen Tags.`;
+    if (!confirm(msg)) return;
+
+    const batch = writeBatch(db);
+    itemsToDelete.forEach(i => batch.delete(doc(db, 'items', i.id)));
+    itemsToUpdate.forEach(({ id, newTags }) => batch.update(doc(db, 'items', id), { tags: newTags }));
+    batch.delete(doc(db, 'travelers', travelerId));
+    await batch.commit();
+
     personFilter.delete(name);
     pickerTags.delete(name);
   }
 
-  // Events
+  // Backup / Restore
+  function exportBackup() {
+    const data = {
+      app: 'checkliste-urlaub',
+      version: TARGET_VERSION,
+      exportedAt: new Date().toISOString(),
+      items: items.map(i => ({ text: i.text, tags: i.tags || [], done: !!i.done })),
+      travelers: travelers.map(t => ({ name: t.name }))
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `urlaub-backup-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  async function importBackup(file) {
+    let data;
+    try {
+      const text = await file.text();
+      data = JSON.parse(text);
+    } catch (e) {
+      alert('Datei konnte nicht gelesen werden.');
+      return;
+    }
+    if (!data || !Array.isArray(data.items)) {
+      alert('Ungültiges Backup-Format.');
+      return;
+    }
+    const itemCount = data.items.length;
+    const travCount = (data.travelers || []).length;
+    if (!confirm(`${itemCount} Items und ${travCount} Mitreisende importieren?\n\n⚠️  ALLE bestehenden Daten werden vorher gelöscht.`)) return;
+
+    // 1) Bestehende löschen
+    const delBatch = writeBatch(db);
+    items.forEach(i => delBatch.delete(doc(db, 'items', i.id)));
+    travelers.forEach(t => delBatch.delete(doc(db, 'travelers', t.id)));
+    await delBatch.commit();
+
+    // 2) Neue einfügen (in Chunks von 400, Firestore-Batch-Limit 500)
+    const all = [
+      ...data.items.map(it => ({
+        ref: doc(itemsRef),
+        data: { text: it.text, tags: it.tags || [], done: !!it.done, createdAt: serverTimestamp() }
+      })),
+      ...(data.travelers || []).map(t => ({
+        ref: doc(travelersRef),
+        data: { name: t.name, createdAt: serverTimestamp() }
+      }))
+    ];
+    for (let i = 0; i < all.length; i += 400) {
+      const b = writeBatch(db);
+      all.slice(i, i + 400).forEach(({ ref, data }) => b.set(ref, data));
+      await b.commit();
+    }
+    alert('Backup erfolgreich importiert.');
+  }
+
+  // ── Event-Handler ──────────────────────────────────────────────────
+
+  // Filter-Card
   document.getElementById('filterCard').addEventListener('click', e => {
     const chip = e.target.closest('.chip');
     if (!chip) return;
@@ -696,11 +940,11 @@
     render();
   });
 
+  // Tag-Picker
   pickerToggle.addEventListener('click', () => {
     tagPicker.classList.toggle('open');
     pickerToggle.textContent = tagPicker.classList.contains('open') ? '− Tags ausblenden' : '+ Tags wählen';
   });
-
   tagPicker.addEventListener('click', e => {
     const chip = e.target.closest('.chip');
     if (!chip) return;
@@ -709,17 +953,77 @@
     chip.classList.toggle('active');
   });
 
+  // Items: Click (toggle / edit / delete)
   taskList.addEventListener('change', e => {
-    if (e.target.type === 'checkbox') toggleItem(e.target.closest('li').dataset.id);
+    if (e.target.type === 'checkbox' && !e.target.disabled) {
+      const li = e.target.closest('li');
+      if (li) toggleItem(li.dataset.id);
+    }
   });
   taskList.addEventListener('click', e => {
-    const btn = e.target.closest('button.delete');
-    if (btn) deleteItem(btn.closest('li').dataset.id);
+    const editBtn = e.target.closest('button.edit');
+    if (editBtn) {
+      editingId = editBtn.closest('li').dataset.id;
+      render();
+      return;
+    }
+    const delBtn = e.target.closest('button.delete');
+    if (delBtn) {
+      deleteItem(delBtn.closest('li').dataset.id);
+      return;
+    }
+    const text = e.target.closest('.task-text');
+    if (text) {
+      editingId = text.closest('li').dataset.id;
+      render();
+    }
   });
 
+  // Edit-Input: Enter speichert, Escape bricht ab
+  taskList.addEventListener('keydown', e => {
+    const input = e.target.closest('.edit-input');
+    if (!input) return;
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      input.blur();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      editingId = null;
+      render();
+    }
+  });
+  taskList.addEventListener('blur', async e => {
+    const input = e.target.closest('.edit-input');
+    if (!input) return;
+    const id = input.closest('li').dataset.id;
+    const newText = input.value;
+    editingId = null;
+    await saveEdit(id, newText);
+    render();
+  }, true); // capture: blur bubblet nicht
+
+  // Hinzufügen
   document.getElementById('addBtn').addEventListener('click', addItem);
   taskInput.addEventListener('keydown', e => { if (e.key === 'Enter') addItem(); });
+
+  // Reset
   document.getElementById('resetDoneBtn').addEventListener('click', resetDone);
+
+  // Hide-Done
+  hideDoneCheck.addEventListener('change', () => {
+    hideDone = hideDoneCheck.checked;
+    localStorage.setItem('hideDone', hideDone ? '1' : '0');
+    render();
+  });
+
+  // Backup / Restore
+  document.getElementById('exportBtn').addEventListener('click', exportBackup);
+  document.getElementById('importBtn').addEventListener('click', () => importInput.click());
+  importInput.addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (file) await importBackup(file);
+    importInput.value = '';
+  });
 
   // Service Worker
   if ('serviceWorker' in navigator) {
