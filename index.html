@@ -184,7 +184,7 @@
       <span id="statusPill" class="status-pill"></span>
     </div>
 
-    <div class="card">
+    <div class="card" id="filterCard">
       <div class="filter-group" data-group="saison">
         <span class="label">Saison</span>
         <span class="chip active" data-value="all">Alle</span>
@@ -660,7 +660,7 @@
   }
 
   // Events
-  document.querySelector('#app .card:first-of-type').addEventListener('click', e => {
+  document.getElementById('filterCard').addEventListener('click', e => {
     const chip = e.target.closest('.chip');
     if (!chip) return;
     if (chip.id === 'addTravelerBtn') { addTraveler(); return; }
